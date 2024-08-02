@@ -15,7 +15,8 @@ exports.create = (req, res) => {
         phoneNumber: req.body.phoneNumber,
         email: req.body.email,
         age: req.body.age,
-        money: req.body.money
+        money: req.body.money,
+        type: "student"
     });
 
     // Save Student in the database

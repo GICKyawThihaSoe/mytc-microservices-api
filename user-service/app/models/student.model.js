@@ -25,6 +25,11 @@ module.exports = mongoose => {
             required: true,
             trim: true // Remove leading/trailing whitespace
         },
+        type: {
+            type: String,
+            required: true,
+            trim: true // Remove leading/trailing whitespace
+        },
     });
   
     studentSchema.method("toJSON", function() {
