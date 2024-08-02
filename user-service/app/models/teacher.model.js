@@ -1,49 +1,45 @@
 module.exports = mongoose => {
-    const studentSchema = mongoose.Schema({
+    const teacherSchema = mongoose.Schema({
         name: {
             type: String,
             required: true,
-            trim: true
+            trim: true // Remove leading/trailing whitespace
         },
         phoneNumber: {
             type: Number,
-            required: true,
-            trim: true
+            required: true
         },
         email: {
             type: String,
             required: true,
-            trim: true
+            trim: true // Remove leading/trailing whitespace
         },
         age: {
             type: Number,
-            required: true,
-            trim: true
+            required: true
         },
         money: {
             type: Number,
-            required: true,
-            trim: true
+            required: true
         },
         type: {
             type: String,
             required: true,
-            trim: true
+            trim: true // Remove leading/trailing whitespace
         },
-        courses: [
+        course: [
             {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "Course"
             }
         ]
     });
 
-    studentSchema.method("toJSON", function() {
+    teacherSchema.method("toJSON", function() {
         const { __v, _id, ...object } = this.toObject();
         object.id = _id;
         return object;
     });
 
-    const Student = mongoose.model("Student", studentSchema);
-    return Student;
+    const Teacher = mongoose.model("Teacher", teacherSchema);
+    return Teacher;
 };

@@ -26,13 +26,12 @@ db.mongoose
 
 // simple route
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to mytc." });
+    res.json({ message: "Welcome to bezkoder application." });
 });
 
-require("./app/routes/student.route")(app);
-require("./app/routes/teacher.route")(app);
+require("./app/routes/course.route")(app);
 
-const port = 3001;
+const port = 3003;
 
 app.listen(port, () => {
     console.log(`User service running on port ${port}`);

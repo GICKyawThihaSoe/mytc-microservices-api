@@ -16,7 +16,8 @@ exports.create = (req, res) => {
         email: req.body.email,
         age: req.body.age,
         money: req.body.money,
-        type: "student"
+        type: "teacher",
+        course: req.body.course || [] // Optional array of course IDs
     });
 
     // Save Student in the database
@@ -27,25 +28,24 @@ exports.create = (req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message:
-                    err.message || "Some error occurred while creating the student."
+                message: err.message || "Some error occurred while creating the student."
             });
         });
 };
 
-// Retrieve all Student from the database.
+// Retrieve all Students from the database.
 exports.findAll = (req, res) => {
     const name = req.query.name;
     const condition = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
 
     Student.find(condition)
+        .populate('enrolled_in', 'title price') // Populate enrolled courses with specific fields
         .then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message:
-                    err.message || "Some error occurred while retrieving students."
+                message: err.message || "Some error occurred while retrieving students."
             });
         });
 };
@@ -55,15 +55,14 @@ exports.findOne = (req, res) => {
     const id = req.params.id;
 
     Student.findById(id)
+        .populate('enrolled_in', 'title price') // Populate enrolled courses with specific fields
         .then(data => {
             if (!data)
                 res.status(404).send({ message: "Not found Student with id " + id });
             else res.send(data);
         })
         .catch(err => {
-            res
-                .status(500)
-                .send({ message: "Error retrieving Student with id=" + id });
+            res.status(500).send({ message: "Error retrieving Student with id=" + id });
         });
 };
 
@@ -115,7 +114,7 @@ exports.delete = (req, res) => {
         });
 };
 
-// Delete all Student from the database.
+// Delete all Students from the database.
 exports.deleteAll = (req, res) => {
     Student.deleteMany({})
         .then(data => {
@@ -125,8 +124,7 @@ exports.deleteAll = (req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message:
-                    err.message || "Some error occurred while removing all students."
+                message: err.message || "Some error occurred while removing all students."
             });
         });
 };
