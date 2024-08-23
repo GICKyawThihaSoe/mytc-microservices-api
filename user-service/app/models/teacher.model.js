@@ -14,6 +14,11 @@ module.exports = mongoose => {
             required: true,
             trim: true // Remove leading/trailing whitespace
         },
+        password: {
+            type: String,
+            required: true,
+            trim: true
+        },
         age: {
             type: Number,
             required: true
@@ -27,11 +32,6 @@ module.exports = mongoose => {
             required: true,
             trim: true // Remove leading/trailing whitespace
         },
-        course: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-            }
-        ]
     });
 
     teacherSchema.method("toJSON", function() {

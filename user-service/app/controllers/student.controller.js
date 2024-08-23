@@ -45,7 +45,6 @@ exports.create = async (req, res) => {
             age: req.body.age,
             money: 500000,
             type: "student",
-            course: req.body.course || [] // Optional array of course IDs
         });
 
         // Save Student in the database

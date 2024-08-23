@@ -1,36 +1,88 @@
+require('dotenv').config();
 const db = require("../models");
 const Teacher = db.teachers;
+const jwt = require('jsonwebtoken'); // Optional: for JWT authentication
+const bcrypt = require('bcryptjs');
 
-// Create and Save a new Student
-exports.create = (req, res) => {
-    // Validate request
-    if (!req.body.name) {
-        res.status(400).send({ message: "Content can not be empty!" });
-        return;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Create and Save a new Teacher
+exports.create = async (req, res) => {
+    if (!req.body.name || !req.body.password || !req.body.confirm_password) {
+        const missingFields = [];
+
+        if (!req.body.name) {
+            missingFields.push('Name');
+        }
+        if (!req.body.password) {
+            missingFields.push('Password');
+        }
+        if (!req.body.confirm_password) {
+            missingFields.push('Confirm Password');
+        }
+        return res.status(400).send({ message: `${missingFields.join(', ')} cannot be empty!` });
     }
 
-    // Create a Student
-    const teacher = new Teacher({
-        name: req.body.name,
-        phoneNumber: req.body.phoneNumber,
-        email: req.body.email,
-        age: req.body.age,
-        money: req.body.money,
-        type: "teahcer",
-        course: req.body.course || [] // Optional array of course IDs
-    });
+    if (req.body.password !== req.body.confirm_password) {
+        return res.status(400).send({ message: "Passwords do not match!" });
+    }
 
-    // Save Student in the database
-    teacher
-        .save(teacher)
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message || "Some error occurred while creating the teacher."
-            });
+    try {
+        const existingTeacher = await Teacher.findOne({ email: req.body.email });
+        if (existingTeacher) {
+            return res.status(400).send({ message: "Email is already exists!" });
+        }
+        const password = String(req.body.password);  // Ensure password is a string
+        const saltRounds = 10; // Ensure salt rounds is a number
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Create a Teacher
+        const teacher = new Teacher({
+            name: req.body.name,
+            phoneNumber: req.body.phoneNumber,
+            email: req.body.email,
+            password: hashedPassword,
+            age: req.body.age,
+            money: 500000,
+            type: "teacher",
         });
+
+        // Save Student in the database
+        const data = await teacher.save();
+        res.send(data);
+    } catch (err) {
+        res.status(500).send({
+            message: err.message || "Some error occurred while creating the student."
+        });
+    }
+};
+
+exports.login = async (req, res) => {
+    const { email } = req.body;
+    const password = String(req.body.password);  // Ensure password is a string
+
+    if (!email || !password) {
+        return res.status(400).send({ message: "Email and Password cannot be empty!" });
+    }
+
+    try {
+        const teacher = await Teacher.findOne({ email: email });
+
+        if (!teacher) {
+            return res.status(404).send({ message: "Teacher not found!" });
+        }
+        const isPasswordValid = await bcrypt.compare(password, teacher.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).send({ message: "Invalid password!" });
+        }
+
+        const token = jwt.sign({ id: teacher._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.send({ teacher: teacher, token: token });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Some error occurred while logging in the teacher." });
+    }
 };
 
 // Retrieve all Teachers from the database.

@@ -15,21 +15,35 @@ module.exports = mongoose => {
             required: true
         },
         teacherId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Teacher",
+            type: String,
             required: true
         },
-        students: [
+        lessons: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Student"
+                title: {
+                    type: String,
+                    required: true,
+                    trim: true
+                },
+                content: {
+                    type: String,
+                    required: true
+                },
+            }
+        ],
+        enrolledStudents: [
+            {
+                student_id: {
+                    type: String,
+                    trim: true
+                }
             }
         ]
     }, {
         timestamps: true
     });
 
-    courseSchema.method("toJSON", function() {
+    courseSchema.method("toJSON", function () {
         const { __v, _id, ...object } = this.toObject();
         object.id = _id;
         return object;

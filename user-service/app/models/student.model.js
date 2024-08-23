@@ -35,12 +35,6 @@ module.exports = mongoose => {
             required: true,
             trim: true
         },
-        courses: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Course"
-            }
-        ]
     });
 
     studentSchema.method("toJSON", function() {

@@ -21,7 +21,8 @@ exports.create = async (req, res) => {
         title: req.body.title,
         description: req.body.description,
         price: req.body.price,
-        teacherId: req.body.teacherId
+        teacherId: req.body.teacherId,
+        lessons: req.body.lessons,
     });
 
     // Save Course in the database
@@ -84,7 +85,7 @@ exports.enroll = async (req, res) => {
             return res.status(404).send({ message: "Student not found" });
         }
 
-        course.students.push(studentId);
+        course.enrolledStudents.push(studentId);
         await course.save();
 
         res.send({ message: "Student enrolled successfully" });
