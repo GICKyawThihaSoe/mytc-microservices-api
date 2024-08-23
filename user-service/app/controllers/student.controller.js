@@ -1,36 +1,89 @@
+require('dotenv').config();
 const db = require("../models");
 const Student = db.students;
+const jwt = require('jsonwebtoken'); // Optional: for JWT authentication
+const bcrypt = require('bcryptjs');
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Create and Save a new Student
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
     // Validate request
-    if (!req.body.name) {
-        res.status(400).send({ message: "Content can not be empty!" });
-        return;
+    if (!req.body.name || !req.body.password || !req.body.confirm_password) {
+        const missingFields = [];
+
+        if (!req.body.name) {
+            missingFields.push('Name');
+        }
+        if (!req.body.password) {
+            missingFields.push('Password');
+        }
+        if (!req.body.confirm_password) {
+            missingFields.push('Confirm Password');
+        }
+        return res.status(400).send({ message: `${missingFields.join(', ')} cannot be empty!` });
     }
 
-    // Create a Student
-    const student = new Student({
-        name: req.body.name,
-        phoneNumber: req.body.phoneNumber,
-        email: req.body.email,
-        age: req.body.age,
-        money: req.body.money,
-        type: "teacher",
-        course: req.body.course || [] // Optional array of course IDs
-    });
+    if (req.body.password !== req.body.confirm_password) {
+        return res.status(400).send({ message: "Passwords do not match!" });
+    }
+    try {
+        const existingStudent = await Student.findOne({ email: req.body.email });
+        if (existingStudent) {
+            return res.status(400).send({ message: "Email is already exists!" });
+        }
+        const password = String(req.body.password);  // Ensure password is a string
+        const saltRounds = 10; // Ensure salt rounds is a number
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Save Student in the database
-    student
-        .save(student)
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message || "Some error occurred while creating the student."
-            });
+        // Create a Student
+        const student = new Student({
+            name: req.body.name,
+            phoneNumber: req.body.phoneNumber,
+            email: req.body.email,
+            password: hashedPassword,
+            age: req.body.age,
+            money: 500000,
+            type: "student",
+            course: req.body.course || [] // Optional array of course IDs
         });
+
+        // Save Student in the database
+        const data = await student.save();
+        res.send(data);
+    } catch (err) {
+        res.status(500).send({
+            message: err.message || "Some error occurred while creating the student."
+        });
+    }
+};
+
+exports.login = async (req, res) => {
+    const { email } = req.body;
+    const password = String(req.body.password);  // Ensure password is a string
+
+    if (!email || !password) {
+        return res.status(400).send({ message: "Email and Password cannot be empty!" });
+    }
+
+    try {
+        const student = await Student.findOne({ email: email });
+
+        if (!student) {
+            return res.status(404).send({ message: "Student not found!" });
+        }
+        const isPasswordValid = await bcrypt.compare(password, student.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).send({ message: "Invalid password!" });
+        }
+
+        const token = jwt.sign({ id: student._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.send({ student: student, token: token });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Some error occurred while logging in the student." });
+    }
 };
 
 // Retrieve all Students from the database.
