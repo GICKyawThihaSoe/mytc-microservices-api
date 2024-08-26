@@ -86,36 +86,34 @@ exports.login = async (req, res) => {
 };
 
 // Retrieve all Students from the database.
-exports.findAll = (req, res) => {
-    const name = req.query.name;
-    const condition = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
+exports.findAll = async (req, res) => {
+    try {
+        const student = await Student.find();
 
-    Student.find(condition)
-        .populate('enrolled_in', 'title price') // Populate enrolled courses with specific fields
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message || "Some error occurred while retrieving students."
-            });
-        });
+        if (student.length === 0) {
+            return res.status(404).send({ message: "Students not found!" });
+        }
+
+        res.send({ students: student });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Some error occurred while retrieving students." });
+    }
 };
 
 // Find a single Student with an id
-exports.findOne = (req, res) => {
+exports.findOne = async (req, res) => {
     const id = req.params.id;
+    try {
+        const student = await Student.findById(id);
 
-    Student.findById(id)
-        .populate('enrolled_in', 'title price') // Populate enrolled courses with specific fields
-        .then(data => {
-            if (!data)
-                res.status(404).send({ message: "Not found Student with id " + id });
-            else res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({ message: "Error retrieving Student with id=" + id });
-        });
+        if (!student) {
+            return res.status(404).send({ message: "Student not found!" });
+        }
+
+        res.send({ student: student });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Error retrieving student with id=" + id });
+    }
 };
 
 // Update a Student by the id in the request

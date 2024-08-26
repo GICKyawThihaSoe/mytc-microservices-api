@@ -1,17 +1,57 @@
 const db = require("../models");
-const Course = db.courses;
-const axios = require('axios');
+const Payment = db.payments;
 
-async function getStudent(studentId) {
-    try {
-        // Make a request to the API Gateway
-        const response = await axios.get(`http://localhost:8000/users/students/${studentId}`);
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching user details:", error.message);
-        throw error;
-    }
-}
+// const express = require('express');
+// const mongoose = require('mongoose');
+
+// const app = express();
+// const port = 3002;
+
+// mongoose.connect('mongodb://localhost:27017/paymentdb', { useNewUrlParser: true, useUnifiedTopology: true });
+
+// const transactionSchema = new mongoose.Schema({
+//     studentId: mongoose.Schema.Types.ObjectId,
+//     teacherId: mongoose.Schema.Types.ObjectId,
+//     amount: Number,
+//     date: { type: Date, default: Date.now }
+// });
+
+// const Transaction = mongoose.model('Transaction', transactionSchema);
+
+// app.use(express.json());
+
+// // Transfer money from student to teacher
+// app.post('/transfer', async (req, res) => {
+//     const { studentId, teacherId, amount } = req.body;
+
+//     const student = await Student.findById(studentId);
+//     const teacher = await Teacher.findById(teacherId);
+
+//     if (student.money < amount) {
+//         return res.status(400).send({ message: 'Insufficient funds' });
+//     }
+
+//     student.money -= amount;
+//     teacher.money += amount;
+
+//     await student.save();
+//     await teacher.save();
+
+//     const transaction = new Transaction({ studentId, teacherId, amount });
+//     await transaction.save();
+
+//     res.send({ message: 'Transfer successful', transaction });
+// });
+
+// // Get transaction history
+// app.get('/transactions', async (req, res) => {
+//     const transactions = await Transaction.find();
+//     res.send(transactions);
+// });
+
+// app.listen(port, () => {
+//     console.log(`Payment service running on port ${port}`);
+// });
 
 // Create and Save a new Course
 exports.create = async (req, res) => {
@@ -91,8 +131,8 @@ exports.findOne = async (req, res) => {
 // Enroll a student in a course
 exports.enroll = async (req, res) => {
     const { courseId, studentId } = req.body;
+
     try {
-        const studentData = await getStudent(studentId);
         const course = await Course.findById(courseId);
         if (!course) {
             return res.status(404).send({ message: "Course not found" });
