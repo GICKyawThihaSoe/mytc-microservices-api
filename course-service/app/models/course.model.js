@@ -29,6 +29,10 @@ module.exports = mongoose => {
                     type: String,
                     required: true
                 },
+                video:{
+                    type: String,
+                    required: true,
+                }
             }
         ],
         enrolledStudents: [
@@ -52,3 +56,4 @@ module.exports = mongoose => {
     const Course = mongoose.model("Course", courseSchema);
     return Course;
 };
+

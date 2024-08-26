@@ -3,7 +3,7 @@ module.exports = app => {
     const router = require("express").Router();
 
     // Create a new Course
-    router.post("/", courses.create);
+    router.post("/create", courses.create);
 
     // Retrieve all Courses
     router.get("/", courses.findAll);
@@ -14,5 +14,5 @@ module.exports = app => {
     // Enroll a student in a course
     router.post("/enroll", courses.enroll);
 
-    app.use("/courses", router);
+    app.use("/", router);
 };

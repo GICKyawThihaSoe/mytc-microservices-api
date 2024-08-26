@@ -24,11 +24,6 @@ db.mongoose
         process.exit();
     });
 
-// simple route
-app.get("/", (req, res) => {
-    res.json({ message: "Welcome to bezkoder application." });
-});
-
 require("./app/routes/course.route")(app);
 
 const port = 3003;
