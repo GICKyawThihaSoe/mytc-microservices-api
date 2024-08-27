@@ -8,7 +8,18 @@ async function getStudent(studentId) {
         const response = await axios.get(`http://localhost:8000/users/students/${studentId}`);
         return response.data;
     } catch (error) {
-        console.error("Error fetching user details:", error.message);
+        console.error("Error fetching student details:", error.message);
+        throw error;
+    }
+}
+
+async function getTeacher(teacherId) {
+    try {
+        // Make a request to the API Gateway
+        const response = await axios.get(`http://localhost:8000/users/teachers/${teacherId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching teacher details:", error.message);
         throw error;
     }
 }
@@ -92,21 +103,28 @@ exports.findOne = async (req, res) => {
 exports.enroll = async (req, res) => {
     const { courseId, studentId } = req.body;
     try {
-        const studentData = await getStudent(studentId);
         const course = await Course.findById(courseId);
         if (!course) {
             return res.status(404).send({ message: "Course not found" });
         }
-
+        const studentData = await getStudent(studentId);
+        const teacherData = await getTeacher(course.teacherId)
         // Check if the student is already enrolled
         const isEnrolled = course.enrolledStudents.some(student => student.student_id == studentId);
         if (isEnrolled) {
             return res.status(400).send({ message: "Student is already enrolled in this course." });
         }
-
-        // Add the student to the enrolledStudents array
-        course.enrolledStudents.push({ student_id: studentId });
-        await course.save();
+        if (studentData.student.money < course.price) {
+            return res.status(400).send({ message: 'Insufficient funds' });
+        } else {
+            studentData.student.money -= course.price;
+            teacherData.teacher.money += course.price;
+            await axios.put(`http://localhost:8000/users/students/${studentId}`, { money: studentData.student.money });
+            await axios.put(`http://localhost:8000/users/teachers/${course.teacherId}`, { money: teacherData.teacher.money });
+            // Add the student to the enrolledStudents array
+            course.enrolledStudents.push({ student_id: studentId });
+            await course.save();
+        }
 
         res.send({ message: "Student enrolled successfully" });
     } catch (err) {

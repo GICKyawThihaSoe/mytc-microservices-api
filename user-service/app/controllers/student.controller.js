@@ -117,28 +117,28 @@ exports.findOne = async (req, res) => {
 };
 
 // Update a Student by the id in the request
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
     if (!req.body) {
         return res.status(400).send({
-            message: "Data to update can not be empty!"
+            message: "Data to update cannot be empty!"
         });
     }
 
     const id = req.params.id;
 
-    Student.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-        .then(data => {
-            if (!data) {
-                res.status(404).send({
-                    message: `Cannot update Student with id=${id}. Maybe Student was not found!`
-                });
-            } else res.send({ message: "Student was updated successfully." });
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: "Error updating Student with id=" + id
+    try {
+        const data = await Student.findByIdAndUpdate(id, req.body, { useFindAndModify: false });
+        if (!data) {
+            return res.status(404).send({
+                message: `Cannot update Student with id=${id}. Maybe Student was not found!`
             });
+        }
+        res.send({ message: "Student was updated successfully." });
+    } catch (err) {
+        res.status(500).send({
+            message: "Error updating Student with id=" + id
         });
+    }
 };
 
 // Delete a Student with the specified id in the request
