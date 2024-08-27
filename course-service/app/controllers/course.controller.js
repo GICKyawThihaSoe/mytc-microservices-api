@@ -139,13 +139,14 @@ exports.enroll = async (req, res) => {
         if (studentData.student.money < course.price) {
             return res.status(400).send({ message: 'Insufficient funds' });
         } else {
+            // Add the student to the enrolledStudents array
+            course.enrolledStudents.push({ student_id: studentId });
+            await course.save();
             studentData.student.money -= course.price;
             teacherData.teacher.money += course.price;
             await axios.put(`http://localhost:8000/users/students/${studentId}`, { money: studentData.student.money });
             await axios.put(`http://localhost:8000/users/teachers/${course.teacherId}`, { money: teacherData.teacher.money });
-            // Add the student to the enrolledStudents array
-            course.enrolledStudents.push({ student_id: studentId });
-            await course.save();
+            await axios.post(`http://localhost:8000/transitions/create`, { studentId: studentId,teacherId: course.teacherId, courseId: courseId, amount: course.price});
         }
 
         res.send({ message: "Student enrolled successfully" });

@@ -24,9 +24,9 @@ db.mongoose
         process.exit();
     });
 
-require("./app/routes/payment.route")(app);
+require("./app/routes/transition.route")(app);
 
-const port = 3003;
+const port = 3002;
 
 app.listen(port, () => {
     console.log(`User service running on port ${port}`);

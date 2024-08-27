@@ -19,7 +19,7 @@ const services = [
         target: "http://localhost:3001",
     },
     {
-        route: "/payments",
+        route: "/transitions",
         target: "http://localhost:3002",
     },
     {
@@ -29,7 +29,7 @@ const services = [
 ];
 
 // Define rate limit constants
-const rateLimit = 20; // Max requests per minute
+const rateLimit = 50; // Max requests per minute
 const interval = 60 * 1000; // Time window in milliseconds (1 minute)
 
 // Object to store request counts for each IP address
