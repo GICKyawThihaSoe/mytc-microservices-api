@@ -1,5 +1,39 @@
 const db = require("../models");
 const Transition = db.transitions;
+const axios = require('axios');
+
+async function getStudent(studentId) {
+    try {
+        // Make a request to the API Gateway
+        const response = await axios.get(`http://localhost:8000/users/students/${studentId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching student details:", error.message);
+        throw error;
+    }
+}
+
+async function getTeacher(teacherId) {
+    try {
+        // Make a request to the API Gateway
+        const response = await axios.get(`http://localhost:8000/users/teachers/${teacherId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching teacher details:", error.message);
+        throw error;
+    }
+}
+
+async function getCourse(courseId) {
+    try {
+        // Make a request to the API Gateway
+        const response = await axios.get(`http://localhost:8000/courses/${courseId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching teacher details:", error.message);
+        throw error;
+    }
+}
 
 // Create and Save a new Transition
 exports.create = async (req, res) => {
@@ -65,7 +99,23 @@ exports.findOne = async (req, res) => {
             return res.status(404).send({ message: "No transitions found for this teacher!" });
         }
 
-        res.send({ transitions: transitions });
+        // Fetch student and teacher details for each transition
+        const transitionsWithDetails = await Promise.all(transitions.map(async (transition) => {
+            const studentData = await getStudent(transition.studentId);
+            const teacherData = await getTeacher(transition.teacherId);
+            const courseData = await getCourse(transition.courseId);
+
+            const { studentId, teacherId,courseId, __v, ...transitionDetails } = transition.toObject();
+
+            return {
+                student: studentData.student, 
+                teacher: teacherData.teacher,  
+                course: courseData.course,
+                ...transitionDetails,
+            };
+        }));
+
+        res.send({ transitions: transitionsWithDetails });
     } catch (err) {
         res.status(500).send({ message: err.message || "Error retrieving transitions for teacherId=" + teacherId });
     }
