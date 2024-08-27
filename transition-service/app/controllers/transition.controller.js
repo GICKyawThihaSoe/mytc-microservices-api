@@ -57,16 +57,17 @@ exports.findAll = async (req, res) => {
 
 // Find a single Course with an id
 exports.findOne = async (req, res) => {
-    const id = req.params.id;
+    const teacherId = req.params.teacherId; // Assuming you pass teacherId as a parameter in the route
     try {
-        const transition = await Transition.findById(id);
+        const transitions = await Transition.find({ teacherId: teacherId });
 
-        if (transition.length === 0) {
-            return res.status(404).send({ message: "Transition not found!" });
+        if (transitions.length === 0) {
+            return res.status(404).send({ message: "No transitions found for this teacher!" });
         }
 
-        res.send({ transition: transition });
+        res.send({ transitions: transitions });
     } catch (err) {
-        res.status(500).send({ message: err.message || "Error retrieving Transition with id=" + id });
+        res.status(500).send({ message: err.message || "Error retrieving transitions for teacherId=" + teacherId });
     }
 };
+

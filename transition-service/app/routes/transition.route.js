@@ -9,7 +9,7 @@ module.exports = app => {
     router.get("/", transitions.findAll);
 
     // Retrieve a single transitions with id
-    router.get("/:id", transitions.findOne);
+    router.get("/:teacherId", transitions.findOne);
 
     app.use("/", router);
 };
