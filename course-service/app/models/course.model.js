@@ -25,13 +25,20 @@ module.exports = mongoose => {
                     required: true,
                     trim: true
                 },
-                content: {
+                description: {
                     type: String,
-                    required: true
+                    required: true,
+                    trim: true
+                },
+                note: {
+                    type: String,
+                    required: true,
+                    trim: true
                 },
                 video:{
                     type: String,
                     required: true,
+                    trim: true
                 }
             }
         ],
