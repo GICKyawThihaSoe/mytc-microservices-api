@@ -4,7 +4,27 @@ const Teacher = db.teachers;
 const jwt = require('jsonwebtoken'); // Optional: for JWT authentication
 const bcrypt = require('bcryptjs');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const TEACHER_JWT_SECRET = process.env.TEACHER_JWT_SECRET;
+
+exports.teachervalidateToken = async (req, res) => {
+    const { token } = req.body;
+
+    if (!token) {
+        return res.status(400).send({ message: "Token is required" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.TEACHER_JWT_SECRET);
+        const teacher = await Teacher.findById(decoded.id); // Adjust this to find the teacher by ID
+        if (!teacher) {
+            return res.status(404).send({ message: "Teacher not found" });
+        }
+
+        res.send({ teacher }); // Send back teacher info or a specific subset of teacher data
+    } catch (err) {
+        return res.status(403).send({ message: "Invalid Token" });
+    }
+};
 
 // Create and Save a new Teacher
 exports.create = async (req, res) => {
@@ -76,9 +96,7 @@ exports.login = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).send({ message: "Invalid password!" });
         }
-
-        const token = jwt.sign({ id: teacher._id }, JWT_SECRET, { expiresIn: '1h' });
-
+        const token = jwt.sign({ id: teacher._id }, TEACHER_JWT_SECRET, { expiresIn: '1h' });
         res.send({ teacher: teacher, token: token });
     } catch (err) {
         res.status(500).send({ message: err.message || "Some error occurred while logging in the teacher." });

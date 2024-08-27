@@ -4,7 +4,27 @@ const Student = db.students;
 const jwt = require('jsonwebtoken'); // Optional: for JWT authentication
 const bcrypt = require('bcryptjs');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const STUDENT_JWT_SECRET = process.env.STUDENT_JWT_SECRET;
+
+exports.studentvalidateToken = async (req, res) => {
+    const { token } = req.body;
+
+    if (!token) {
+        return res.status(400).send({ message: "Token is required" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.STUDENT_JWT_SECRET);
+        const student = await Student.findById(decoded.id); // Adjust this to find the teacher by ID
+        if (!student) {
+            return res.status(404).send({ message: "Student not found" });
+        }
+
+        res.send({ student }); // Send back student info or a specific subset of student data
+    } catch (err) {
+        return res.status(403).send({ message: "Invalid Token" });
+    }
+};
 
 // Create and Save a new Student
 exports.create = async (req, res) => {
@@ -77,7 +97,7 @@ exports.login = async (req, res) => {
             return res.status(401).send({ message: "Invalid password!" });
         }
 
-        const token = jwt.sign({ id: student._id }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: student._id }, STUDENT_JWT_SECRET, { expiresIn: '1h' });
 
         res.send({ student: student, token: token });
     } catch (err) {

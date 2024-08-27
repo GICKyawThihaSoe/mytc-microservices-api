@@ -7,6 +7,8 @@ module.exports = app => {
     router.post("/register", teachers.create);
 
     router.post("/login", teachers.login);
+
+    router.post("/validate-token", teachers.teachervalidateToken);
   
     // Retrieve all Teachers
     router.get("/", teachers.findAll);

@@ -7,7 +7,9 @@ module.exports = app => {
     router.post("/register", students.create);
 
     router.post("/login", students.login);
-  
+
+    router.post("/validate-token", students.studentvalidateToken);
+
     // Retrieve all Students
     router.get("/", students.findAll);
   
