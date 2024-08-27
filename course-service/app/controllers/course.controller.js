@@ -27,7 +27,7 @@ async function getTeacher(teacherId) {
 // Create and Save a new Course
 exports.create = async (req, res) => {
     // Validate request
-    if (!req.body.title || !req.body.description || !req.body.price || !req.body.teacherId || !req.body.lessons) {
+    if (!req.body.title || !req.body.description || !req.body.price || !req.body.teacherId) {
         const missingFields = [];
 
         if (!req.body.title) {
@@ -42,9 +42,6 @@ exports.create = async (req, res) => {
         if (!req.body.teacherId) {
             missingFields.push('TeacherId');
         }
-        if (!req.body.lessons) {
-            missingFields.push('Lessons');
-        }
         return res.status(400).send({ message: `${missingFields.join(', ')} cannot be empty!` });
     }
 
@@ -55,7 +52,7 @@ exports.create = async (req, res) => {
             description: req.body.description,
             price: req.body.price,
             teacherId: req.body.teacherId,
-            lessons: req.body.lessons,
+            lessons: req.body.lessons || [],
             enrolledStudents: req.body.enrolledStudents || []
         });
         // Save Course in the database
@@ -96,6 +93,31 @@ exports.findOne = async (req, res) => {
         res.send({ courses: course });
     } catch (err) {
         res.status(500).send({ message: err.message || "Error retrieving Course with id=" + id });
+    }
+};
+
+// Update a Course by the id in the request
+exports.update = async (req, res) => {
+    if (!req.body) {
+        return res.status(400).send({
+            message: "Data to update cannot be empty!"
+        });
+    }
+
+    const id = req.params.id;
+
+    try {
+        const data = await Course.findByIdAndUpdate(id, req.body, { useFindAndModify: false });
+        if (!data) {
+            return res.status(404).send({
+                message: `Cannot update Course with id=${id}. Maybe Course was not found!`
+            });
+        }
+        res.send({ message: "Course was updated successfully." });
+    } catch (err) {
+        res.status(500).send({
+            message: "Error updating Course with id=" + id
+        });
     }
 };
 

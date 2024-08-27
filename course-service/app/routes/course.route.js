@@ -14,6 +14,9 @@ module.exports = app => {
     // Retrieve a single Course with id
     router.get("/:id",courses.findOne);
 
+    // Update a Course with id
+    router.put("/:id", courses.update);
+
     // Enroll a student in a course
     router.post("/enroll", studentauthenticateToken,courses.enroll);
 
