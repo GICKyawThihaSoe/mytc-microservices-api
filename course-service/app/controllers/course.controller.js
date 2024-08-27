@@ -112,7 +112,6 @@ exports.findOne = async (req, res) => {
     const id = req.params.id;
     try {
         const course = await Course.findById(id);
-
         if (!course) {
             return res.status(404).send({ message: "Course not found!" });
         }
@@ -134,6 +133,45 @@ exports.findOne = async (req, res) => {
         res.send({ course: courseWithStudentDetails });
     } catch (err) {
         res.status(500).send({ message: err.message || "Error retrieving Course with id=" + id });
+    }
+};
+
+exports.findWithTeacherId = async (req, res) => {
+    const teacherId = req.params.teacherId; 
+    try {
+        // Fetch all courses with the given teacherId
+        const courses = await Course.find({ teacherId: teacherId });
+
+        if (courses.length === 0) {
+            return res.status(404).send({ message: "Courses not found for the given teacherId!" });
+        }
+
+        // Process each course to get student details and remove __v field
+        const coursesWithStudentDetails = await Promise.all(
+            courses.map(async (course) => {
+                const enrolledStudents = Array.isArray(course.enrolledStudents) ? course.enrolledStudents : [];
+
+                const studentDetailsPromises = enrolledStudents.map(async (enrollment) => {
+                    const studentData = await getStudent(enrollment.student_id);
+                    return studentData.student; // Assuming student details are under `student` key
+                });
+
+                const enrolledStudentsDetails = await Promise.all(studentDetailsPromises);
+
+                // Convert Mongoose document to a plain object and remove __v field
+                const courseObject = course.toObject ? course.toObject() : course._doc;
+                delete courseObject.__v;
+
+                return {
+                    ...courseObject, // Spread operator to include all course properties except __v
+                    enrolledStudents: enrolledStudentsDetails,
+                };
+            })
+        );
+
+        res.send({ courses: coursesWithStudentDetails });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Error retrieving courses for teacherId=" + teacherId });
     }
 };
 

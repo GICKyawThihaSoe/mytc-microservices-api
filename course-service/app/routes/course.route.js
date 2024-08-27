@@ -11,6 +11,8 @@ module.exports = app => {
     // Retrieve all Courses
     router.get("/",courses.findAll);
 
+    router.get("/teacherId/:teacherId", courses.findWithTeacherId);
+
     // Retrieve a single Course with id
     router.get("/:id",courses.findOne);
 
