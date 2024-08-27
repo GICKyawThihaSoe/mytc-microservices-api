@@ -83,7 +83,22 @@ exports.findAll = async (req, res) => {
             return res.status(404).send({ message: "Transitions not found!" });
         }
 
-        res.send({ transition: transition });
+        const transitionsWithDetails = await Promise.all(transition.map(async (transition) => {
+            const studentData = await getStudent(transition.studentId);
+            const teacherData = await getTeacher(transition.teacherId);
+            const courseData = await getCourse(transition.courseId);
+
+            const { studentId, teacherId,courseId, __v, ...transitionDetails } = transition.toObject();
+
+            return {
+                student: studentData.student, 
+                teacher: teacherData.teacher,  
+                course: courseData.course,
+                ...transitionDetails,
+            };
+        }));
+
+        res.send({ transitions: transitionsWithDetails });
     } catch (err) {
         res.status(500).send({ message: err.message || "Some error occurred while retrieving transitions." });
     }
