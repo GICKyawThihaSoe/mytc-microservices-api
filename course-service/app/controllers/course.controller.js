@@ -68,13 +68,40 @@ exports.create = async (req, res) => {
 // Retrieve all Courses from the database.
 exports.findAll = async (req, res) => {
     try {
-        const course = await Course.find();
-
-        if (course.length === 0) {
+        const courses = await Course.find();
+        if (courses.length === 0) {
             return res.status(404).send({ message: "Courses not found!" });
         }
 
-        res.send({ courses: course });
+        // Iterate through each course and fetch detailed information for enrolled students
+        const coursesWithStudentDetails = await Promise.all(
+            courses.map(async (course) => {
+                const enrolledStudents = Array.isArray(course.enrolledStudents) ? course.enrolledStudents : [];
+
+                const studentDetailsPromises = enrolledStudents.map(async (enrollment) => {
+                    const studentData = await getStudent(enrollment.student_id);
+                    return {
+                        name: studentData.student.name,
+                        phoneNumber: studentData.student.phoneNumber,
+                        email: studentData.student.email,
+                        password: studentData.student.password,
+                        age: studentData.student.age,
+                        money: studentData.student.money,
+                        type: studentData.student.type,
+                        id: studentData.student.id,
+                    };
+                });
+
+                const enrolledStudentsDetails = await Promise.all(studentDetailsPromises);
+
+                return {
+                    ...course.toObject(),
+                    enrolledStudents: enrolledStudentsDetails,
+                };
+            })
+        );
+
+        res.send({ courses: coursesWithStudentDetails });
     } catch (err) {
         res.status(500).send({ message: err.message || "Some error occurred while retrieving courses." });
     }
@@ -90,7 +117,21 @@ exports.findOne = async (req, res) => {
             return res.status(404).send({ message: "Course not found!" });
         }
 
-        res.send({ courses: course });
+        // Fetch detailed information for each enrolled student
+        const enrolledStudents = Array.isArray(course.enrolledStudents) ? course.enrolledStudents : [];
+        const studentDetailsPromises = enrolledStudents.map(async (enrollment) => {
+            const studentData = await getStudent(enrollment.student_id);
+            return studentData.student; // Assuming student details are under `student` key
+        });
+
+        const enrolledStudentsDetails = await Promise.all(studentDetailsPromises);
+
+        const courseWithStudentDetails = {
+            ...course.toObject(), // Convert Mongoose document to a plain object
+            enrolledStudents: enrolledStudentsDetails,
+        };
+
+        res.send({ course: courseWithStudentDetails });
     } catch (err) {
         res.status(500).send({ message: err.message || "Error retrieving Course with id=" + id });
     }
@@ -146,7 +187,7 @@ exports.enroll = async (req, res) => {
             teacherData.teacher.money += course.price;
             await axios.put(`http://localhost:8000/users/students/${studentId}`, { money: studentData.student.money });
             await axios.put(`http://localhost:8000/users/teachers/${course.teacherId}`, { money: teacherData.teacher.money });
-            await axios.post(`http://localhost:8000/transitions/create`, { studentId: studentId,teacherId: course.teacherId, courseId: courseId, amount: course.price});
+            await axios.post(`http://localhost:8000/transitions/create`, { studentId: studentId, teacherId: course.teacherId, courseId: courseId, amount: course.price });
         }
 
         res.send({ message: "Student enrolled successfully" });
