@@ -43,3 +43,19 @@ exports.create = async (req, res) => {
         });
     }
 };
+
+exports.findWithCourseId = async (req, res) => {
+    const courseId = req.params.courseId; 
+    try {
+        // Fetch all courses with the given teacherId
+        const lessons = await Lesson.find({ course: courseId });
+        console.log(lessons)
+        if (lessons.length === 0) {
+            return res.status(404).send({ message: "lessons not found for the given CourseId!" });
+        }
+
+        res.send({ lessons: lessons });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Error retrieving lessons for courseId=" + courseId });
+    }
+};
