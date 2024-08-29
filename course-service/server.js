@@ -25,6 +25,7 @@ db.mongoose
     });
 
 require("./app/routes/course.route")(app);
+require("./app/routes/lesson.route")(app);
 
 const port = 3003;
 
