@@ -96,6 +96,7 @@ exports.findAll = async (req, res) => {
 
                 return {
                     ...course.toObject(),
+                    enrolledStudents_count: enrolledStudents.length,
                     enrolledStudents: enrolledStudentsDetails,
                 };
             })
@@ -127,6 +128,7 @@ exports.findOne = async (req, res) => {
 
         const courseWithStudentDetails = {
             ...course.toObject(), // Convert Mongoose document to a plain object
+            enrolledStudents_count: enrolledStudents.length,
             enrolledStudents: enrolledStudentsDetails,
         };
 
@@ -164,6 +166,7 @@ exports.findWithTeacherId = async (req, res) => {
 
                 return {
                     ...courseObject, // Spread operator to include all course properties except __v
+                    enrolledStudents_count: enrolledStudents.length,
                     enrolledStudents: enrolledStudentsDetails,
                 };
             })
