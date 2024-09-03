@@ -4,17 +4,11 @@ const Lesson = db.lessons;
 // Create and Save a new Course
 exports.create = async (req, res) => {
     // Validate request
-    if (!req.body.title || !req.body.description || !req.body.note || !req.body.video || !req.body.course) {
+    if (!req.body.title || !req.body.video || !req.body.course) {
         const missingFields = [];
 
         if (!req.body.title) {
             missingFields.push('Title');
-        }
-        if (!req.body.description) {
-            missingFields.push('Description');
-        }
-        if (!req.body.note) {
-            missingFields.push('Note');
         }
         if (!req.body.video) {
             missingFields.push('Video');
@@ -29,8 +23,6 @@ exports.create = async (req, res) => {
         // Create a Course
         const lesson = new Lesson({
             title: req.body.title,
-            description: req.body.description,
-            note: req.body.note,
             video: req.body.video,
             course: req.body.course
         });
