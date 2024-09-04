@@ -7,7 +7,7 @@ module.exports = app => {
 
     // Create a new Course
     router.post("/create", teacherauthenticateToken,lessons.create);
-    router.get("/courseId/:courseId", teacherauthenticateToken,lessons.findWithCourseId);
+    router.get("/courseId/:courseId",lessons.findWithCourseId);
 
     app.use("/lessons", router);
 };
