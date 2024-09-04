@@ -126,20 +126,25 @@ exports.findOne = async (req, res) => {
 
         const enrolledStudentsDetails = await Promise.all(studentDetailsPromises);
 
-        const courseWithStudentDetails = {
+        // Fetch teacher details
+        const teacherData = await getTeacher(course.teacherId);
+        const teacherDetails = teacherData.teacher; // Assuming teacher details are under `teacher` key
+
+        const courseWithDetails = {
             ...course.toObject(), // Convert Mongoose document to a plain object
+            teacher: teacherDetails, // Add teacher details to the response
             enrolledStudents_count: enrolledStudents.length,
             enrolledStudents: enrolledStudentsDetails,
         };
 
-        res.send({ course: courseWithStudentDetails });
+        res.send({ course: courseWithDetails });
     } catch (err) {
         res.status(500).send({ message: err.message || "Error retrieving Course with id=" + id });
     }
 };
 
 exports.findWithTeacherId = async (req, res) => {
-    const teacherId = req.params.teacherId; 
+    const teacherId = req.params.teacherId;
     try {
         // Fetch all courses with the given teacherId
         const courses = await Course.find({ teacherId: teacherId });
