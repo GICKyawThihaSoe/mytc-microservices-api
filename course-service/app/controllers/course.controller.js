@@ -53,7 +53,8 @@ exports.create = async (req, res) => {
             price: req.body.price,
             teacherId: req.body.teacherId,
             lessons: req.body.lessons || [],
-            enrolledStudents: req.body.enrolledStudents || []
+            enrolledStudents: req.body.enrolledStudents || [],
+            status: req.body.status || 0
         });
         // Save Course in the database
         const data = await course.save();

@@ -45,11 +45,15 @@ module.exports = mongoose => {
         enrolledStudents: [
             {
                 student_id: {
-                    type: String,
+                    type: Number,
                     trim: true
                 }
             }
-        ]
+        ],
+        status: {
+            type: String,
+            trim: true
+        }
     }, {
         timestamps: true
     });
