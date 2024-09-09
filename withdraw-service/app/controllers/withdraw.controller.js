@@ -45,7 +45,6 @@ exports.create = async (req, res) => {
             if (!validStatuses) {
                 return res.status(400).send({ message: "Please Waiting..." });
             }
-            return;
         }
         // Save Transition in the database
         const data = await withdraw.save();
@@ -98,7 +97,6 @@ exports.update = async (req, res) => {
     try {
         // Check if the withdrawal exists
         const existingWithdraw = await Withdraw.findById(id);
-        console.log('existingWithdraw',existingWithdraw)
         if (!existingWithdraw) {
             return res.status(404).send({ message: "Withdrawal not found!" });
         }
@@ -110,7 +108,6 @@ exports.update = async (req, res) => {
         const updatedWithdraw = await existingWithdraw.save();
         res.send(updatedWithdraw);
         const teacherData = await getTeacher(existingWithdraw.teacherId);
-        console.log('teacherData',teacherData)
         teacherData.teacher.money -= existingWithdraw.amount;
         await axios.put(`http://localhost:8000/users/teachers/${existingWithdraw.teacherId}`, { money: teacherData.teacher.money });
     } catch (err) {
