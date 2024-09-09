@@ -1,22 +1,17 @@
 module.exports = mongoose => {
     const transitionSchema = mongoose.Schema({
-        studentId: {
-            type: String,
-            required: true,
-            trim: true
-        },
         teacherId: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        courseId: {
             type: String,
             required: true,
             trim: true
         },
         amount: {
             type: Number,
+            required: true,
+            trim: true
+        },
+        status: {
+            type: String,
             required: true,
             trim: true
         },

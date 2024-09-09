@@ -31,6 +31,7 @@ app.get("/", (req, res) => {
 
 require("./app/routes/student.route")(app);
 require("./app/routes/teacher.route")(app);
+require("./app/routes/admin.route")(app);
 
 const port = 3001;
 

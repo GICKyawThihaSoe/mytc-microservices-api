@@ -8,5 +8,6 @@ db.mongoose = mongoose;
 db.url = dbConfig.url;
 db.students = require("./student.model.js")(mongoose);
 db.teachers = require("./teacher.model.js")(mongoose);
+db.admins = require("./admin.model.js")(mongoose);
 
 module.exports = db;
