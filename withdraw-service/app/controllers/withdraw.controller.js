@@ -87,3 +87,33 @@ exports.findOne = async (req, res) => {
     }
 };
 
+exports.update = async (req, res) => {
+    const id = req.params.id;
+
+    // Validate request
+    if (!req.body.status) {
+        return res.status(400).send({ message: "Status must be provided for update!" });
+    }
+
+    try {
+        // Check if the withdrawal exists
+        const existingWithdraw = await Withdraw.findById(id);
+        console.log('existingWithdraw',existingWithdraw)
+        if (!existingWithdraw) {
+            return res.status(404).send({ message: "Withdrawal not found!" });
+        }
+
+        // Update the withdrawal
+        if (req.body.status) {
+            existingWithdraw.status = req.body.status;
+        }
+        const updatedWithdraw = await existingWithdraw.save();
+        res.send(updatedWithdraw);
+        const teacherData = await getTeacher(existingWithdraw.teacherId);
+        console.log('teacherData',teacherData)
+        teacherData.teacher.money -= existingWithdraw.amount;
+        await axios.put(`http://localhost:8000/users/teachers/${existingWithdraw.teacherId}`, { money: teacherData.teacher.money });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Error updating the withdrawal." });
+    }
+};

@@ -11,5 +11,7 @@ module.exports = app => {
     // Retrieve a single transitions with id
     router.get("/:teacherId", withdraws.findOne);
 
+    router.put("/:id", withdraws.update);
+
     app.use("/", router);
 };
