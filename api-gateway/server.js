@@ -26,6 +26,10 @@ const services = [
         route: "/courses",
         target: "http://localhost:3003",
     },
+    {
+        route: "/withdraws",
+        target: "http://localhost:3004",
+    },
 ];
 
 // Define rate limit constants
