@@ -107,9 +107,11 @@ exports.update = async (req, res) => {
         }
         const updatedWithdraw = await existingWithdraw.save();
         res.send(updatedWithdraw);
-        const teacherData = await getTeacher(existingWithdraw.teacherId);
-        teacherData.teacher.money -= existingWithdraw.amount;
-        await axios.put(`http://localhost:8000/users/teachers/${existingWithdraw.teacherId}`, { money: teacherData.teacher.money });
+        if (req.body.status !== 2) {
+            const teacherData = await getTeacher(existingWithdraw.teacherId);
+            teacherData.teacher.money -= existingWithdraw.amount;
+            await axios.put(`http://localhost:8000/users/teachers/${existingWithdraw.teacherId}`, { money: teacherData.teacher.money });
+        }
     } catch (err) {
         res.status(500).send({ message: err.message || "Error updating the withdrawal." });
     }
